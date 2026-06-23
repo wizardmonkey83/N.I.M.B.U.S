@@ -1,0 +1,18 @@
+{
+    "settling_locations": {
+        "new_york_city": {
+            "name": "central_park",
+            "coordinates": {
+                "latitude": 40.785091,
+                "longitude": -73.968285,
+                "bound_box": {
+                    "top": 41.285091,
+                    "bottom": 40.285091,
+                    "left": 285.531715,
+                    "right": 286.531715
+                }
+            },
+            "grib_filter_url": "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl?dir=%2Fgfs.{todays_date}%2F{file_cycle}%2Fatmos&file=gfs.t{file_cycle}z.pgrb2.0p25.f0{forcast_hour}&var_TMAX=on&var_TMIN=on&lev_2_m_above_ground=on&subregion=&toplat=41.285091&leftlon=285.531715&rightlon=286.531715&bottomlat=40.285091"
+        }
+    }
+}
