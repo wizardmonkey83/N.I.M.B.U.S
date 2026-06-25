@@ -8,10 +8,12 @@ from tempfile import NamedTemporaryFile
 def get_noaa_forecast(url: str, forecast_hour: str):
     # url needs these params --> todays_date, file_cycle, forecast_hour
     # todays_date --> yyyymmdd
-    # file_cycle --> 
+    # file_cycle --> 00, 06, 12, 18
 
     date_obj = datetime.now()
     todays_date = date_obj.strftime("%Y%m%d")
+
+    file_cycle = "18"
 
     # avoids potential script identification
     headers = {
@@ -23,6 +25,9 @@ def get_noaa_forecast(url: str, forecast_hour: str):
         try: 
 
             with NamedTemporaryFile(suffix=".grib2", delete=False) as temp_forecast:
+
+                url = url.format(todays_date=todays_date, forecast_hour=forecast_hour, file_cycle=file_cycle)
+                print(f"URL: {url}")
 
                 with requests.get(url, timeout=15, headers=headers, stream=True) as r:
                     r.raise_for_status()
@@ -36,6 +41,7 @@ def get_noaa_forecast(url: str, forecast_hour: str):
 
         except Exception as e:
             print(f"Error getting forecast. Cycle: {i}. Error: {e}")
+            print(f"Resposnse content: {r.content}")
             time.sleep(i * 2)
         
     return forecast_path
