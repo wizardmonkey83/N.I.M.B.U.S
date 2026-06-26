@@ -12,7 +12,7 @@
                     "right": 286.531715
                 }
             },
-            "grib_filter_url": "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl?dir=%2Fgfs.{todays_date}%2F{file_cycle}%2Fatmos&file=gfs.t{file_cycle}z.pgrb2.0p25.f0{forecast_hour}&var_TMAX=on&var_TMIN=on&lev_2_m_above_ground=on&subregion=&toplat=41.285091&leftlon=285.531715&rightlon=286.531715&bottomlat=40.285091"
+            "grib_filter_url": "https://nomads.ncep.noaa.gov/cgi-bin/filter_gefs_atmos_0p25s.pl?dir=%2Fgefs.{todays_date}%2F{file_cycle}%2Fatmos%2Fpgrb2sp25&file={member_id}.t{file_cycle}z.pgrb2s.0p25.f{forecast_hour}&var_TMAX=on&var_TMIN=on&lev_2_m_above_ground=on&subregion=&toplat=41.285091&leftlon=285.531715&rightlon=286.531715&bottomlat=40.285091"
         }
     }
 }
