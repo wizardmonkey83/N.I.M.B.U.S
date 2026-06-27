@@ -99,6 +99,4 @@ def get_noaa_forecast(url: str, forecast_hour: str, latitude: str, longitude: st
 
         print(f" Values from file {file} successfully loaded.")
     
-    print(f"TMAX VALUES: {tmax_values}")
-    print(f"TMIN VALUES: {tmin_values}")
     return tmax_values, tmin_values

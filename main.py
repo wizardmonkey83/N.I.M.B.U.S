@@ -7,5 +7,7 @@ noaa_url = config.get("settling_locations").get("new_york_city").get("grib_filte
 latitude = config.get("settling_locations").get("new_york_city").get("coordinates").get("latitude")
 longitude = config.get("settling_locations").get("new_york_city").get("coordinates").get("longitude")
 
-temp_forecast_path = get_noaa_forecast(url=noaa_url, forecast_hour="006", latitude=latitude, longitude=longitude)
+print("Getting noaa forecast")
+tmax_values, tmin_values = get_noaa_forecast(url=noaa_url, forecast_hour="006", latitude=latitude, longitude=longitude)
+
 
