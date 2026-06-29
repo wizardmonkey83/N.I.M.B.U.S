@@ -1,18 +1,26 @@
 {
     "settings": {
+        "test_mode": true,
         "trading": {
             "min_edge_pct": 10,
             "max_bet_pct_of_portfolio": 10,
             "min_pct_of_values_in_temp_range": 20,
             "min_pct_of_values_over_under_temp": 20
         },
-        "kalshi_ws_url_demo": "wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2",
-        "kalshi_ws_url": "wss://external-api-ws.kalshi.com/trade-api/ws/v2",
-        "buy_order_url_path": "/trade-api/v2/portfolio/events/orders",
-        "buy_order_base_url_path": "https://external-api.kalshi.com"
-    },
-    "markets": {
-
+        "urls":{
+            "requests": {
+                "kalshi_portfolio_balance_url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
+                "buy_order_base_url_path": "https://external-api.kalshi.com"
+            },
+            "endpoints": {
+                "kalshi_portfolio_balance_endpoint": "trade-api/v2/portfolio/balance",
+                "buy_order_url_path": "/trade-api/v2/portfolio/events/orders"
+            },
+            "websockets": {
+                "kalshi_ws_url_demo": "wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2",
+                "kalshi_ws_url": "wss://external-api-ws.kalshi.com/trade-api/ws/v2"
+            }
+        }
     },
     "settling_locations": {
         "new_york_city": {

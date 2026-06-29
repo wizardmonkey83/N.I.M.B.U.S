@@ -6,6 +6,8 @@ import xarray
 from datetime import datetime
 from tempfile import NamedTemporaryFile
 
+from core.state import DataState
+
 def convert_to_f_from_k(temp: float):
     return (temp - 273.15) * 1.8 + 32
 
@@ -43,7 +45,7 @@ def extract_forecast_from_temp(temp_forecast_path: str, latitude: float, longitu
 
 
 # makes the get call to noaa to get raw temp information
-def get_noaa_forecast(url: str, forecast_hour: str, latitude: str, longitude: str):
+def get_noaa_forecast(url: str, latitude: str, longitude: str):
     # url needs these params --> todays_date, file_cycle, forecast_hour
     # todays_date --> yyyymmdd
     # file_cycle --> 00, 06, 12, 18
@@ -51,7 +53,15 @@ def get_noaa_forecast(url: str, forecast_hour: str, latitude: str, longitude: st
     date_obj = datetime.now()
     todays_date = date_obj.strftime("%Y%m%d")
 
-    file_cycle = "06"
+    curr_hour = datetime.now().hour
+    if len(curr_hour) == 2:
+        forecast_hour = f"0{curr_hour}"
+        file_cycle = str(curr_hour)
+    elif len(curr_hour) == 1:
+        forecast_hour = f"00{curr_hour}"
+        file_cycle = f"0{curr_hour}"
+    # TODO might need a failsafe in case datetime implodes
+
 
     # avoids potential script identification
     headers = {
@@ -99,4 +109,6 @@ def get_noaa_forecast(url: str, forecast_hour: str, latitude: str, longitude: st
 
         print(f" Values from file {file} successfully loaded.")
     
-    return tmax_values, tmin_values
+    DataState.tmax_noaa_values = tmax_values
+    DataState.tmin_noaa_values = tmin_values
+    print("TMAX, TMIN values loaded to trading state!")

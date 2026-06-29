@@ -1,10 +1,16 @@
 import base64
+import datetime
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.exceptions import InvalidSignature
 
+def generate_timestamp():
+    curr_datetime = datetime.datetime.now()
+    timestamp = curr_datetime.timestamp()
+    curr_time_miliseconds = int(timestamp * 1000)
+    return str(curr_time_miliseconds)
 
 def load_private_key_from_file(file_path: str):
     with open(file_path, "rb") as key_file:
@@ -15,8 +21,9 @@ def load_private_key_from_file(file_path: str):
         )
     return private_key
 
-def create_signature(private_key, timestamp, method, path):
-    """Create the request signature."""
+def create_signature(private_key, method, path):
+    timestamp = generate_timestamp()
+
     # Strip query parameters before signing
     path_without_query = path.split('?')[0]
     message = f"{timestamp}{method}{path_without_query}".encode('utf-8')
@@ -26,3 +33,14 @@ def create_signature(private_key, timestamp, method, path):
         hashes.SHA256()
     )
     return base64.b64encode(signature).decode('utf-8')
+
+def package_header(api_key_id: str, generated_signature: str):
+    timestamp = generate_timestamp()
+
+    auth_header = {
+        "KALSHI-ACCESS-KEY": api_key_id,
+        "KALSHI-ACCESS-SIGNATURE": generated_signature,
+        "KALSHI-ACCESS-TIMESTAMP": timestamp
+    }
+
+    return auth_header
