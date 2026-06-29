@@ -8,20 +8,20 @@ from trading.probability import calculate_edge
 from trading.trade import buy_contracts
 from connection.credentials import package_header, create_signature, generate_timestamp
 
-def get_account_balance():
+def get_account_balance(timestamp: str):
     api_key_id = ConfigState.api_key_id
-    generated_signature = create_signature(private_key=ConfigState.private_key, method="GET", path=ConfigState.portfolio_balance_url_endpoint)
-    headers = package_header(api_key_id=api_key_id, generated_signature=generated_signature)
+    generated_signature = create_signature(private_key=ConfigState.private_key, method="GET", path=ConfigState.portfolio_balance_url_endpoint, timestamp=timestamp)
+    headers = package_header(api_key_id=api_key_id, generated_signature=generated_signature, timestamp=timestamp)
 
     request_url = ConfigState.portfolio_balance_url_requests
     response = requests.get(url=request_url, headers=headers)
 
     if response.status_code != 200:
         print("Error getting account balance!")
-        print(f"Details: {response.details}")
+        print(f"Details: {response.text}")
     else: 
         # double check kalshi's docs, they looked a bit funky on the formatting for "balance_dollars"
-        balance_dollars = response.balance_dollars
+        balance_dollars = response.json().get("balance_dollars")
         TradingState.total_portfolio_usd = float(balance_dollars)
 
 
@@ -33,8 +33,6 @@ async def connect(ws_url: str, api_key_id: str, generated_signature: str):
 
         async for message in websocket:
             print(f"Received: {message}")
-
-asyncio.run(connect())
 
 async def subscribe_to_markets(self, channels: list, mkt_tickers: list):
     subscription_message = {
@@ -62,4 +60,4 @@ async def process_message(message):
     should_buy, calculated_odds = calculate_edge(data["ticker"], data["best_bid"], data["best_ask"])
 
     if should_buy:
-        asyncio.create_task(buy_contracts(curr_contract_price=data["best_ask"], ticker=data["ticker"]), calculated_prob=calculated_odds)
+        asyncio.create_task(buy_contracts(curr_contract_price=data["best_ask"], ticker=data["ticker"], calculated_prob=calculated_odds))

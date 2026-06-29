@@ -21,9 +21,6 @@ class ConfigState:
     api_key_id: str
     private_key: str
 
-    api_key_id: str
-    private_key: str
-    
     buy_order_url: str
     buy_order_base_url: str
     pk_file_path: str

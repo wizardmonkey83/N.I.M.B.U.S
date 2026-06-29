@@ -21,9 +21,7 @@ def load_private_key_from_file(file_path: str):
         )
     return private_key
 
-def create_signature(private_key, method, path):
-    timestamp = generate_timestamp()
-
+def create_signature(private_key: str, method: str, path: str, timestamp: str):
     # Strip query parameters before signing
     path_without_query = path.split('?')[0]
     message = f"{timestamp}{method}{path_without_query}".encode('utf-8')
@@ -34,8 +32,7 @@ def create_signature(private_key, method, path):
     )
     return base64.b64encode(signature).decode('utf-8')
 
-def package_header(api_key_id: str, generated_signature: str):
-    timestamp = generate_timestamp()
+def package_header(api_key_id: str, generated_signature: str, timestamp: str):
 
     auth_header = {
         "KALSHI-ACCESS-KEY": api_key_id,
