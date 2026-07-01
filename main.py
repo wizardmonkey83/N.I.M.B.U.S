@@ -34,9 +34,10 @@ get_noaa_forecast(noaa_url=noaa_url, latitude=latitude, longitude=longitude)
 scheduler = AsyncIOScheduler()
 scheduler.add_job(get_noaa_forecast, "cron", hour="*/6", minute=0, kwargs={"noaa_url": noaa_url, "latitude": latitude, "longitude": longitude})
 # TODO add job that checks currently held contracts against updated odds to see if selling is optimal. should run on the same schedule as get_noaa_forecast
-scheduler.start()
 
 async def main():
+    # needs to start within the main event loop for time sync purposes
+    scheduler.start()
     timestamp = generate_timestamp()
     if test_mode:
         ws_url = config.get("settings", {}).get("urls", {}).get("websockets", {}).get("kalshi_ws_url_demo")
@@ -46,7 +47,7 @@ async def main():
     ws_url_endpoint = config.get("settings", {}).get("urls", {}).get("endpoints", {}).get("kalshi_trade_endpoint")
 
     generated_signature = create_signature(private_key=ConfigState.private_key, method="GET", path=ws_url_endpoint, timestamp=timestamp)
-    await connect(ws_url=ws_url, api_key_id=ConfigState.api_key_id, generated_signature=generated_signature)
+    await connect(ws_url=ws_url, api_key_id=ConfigState.api_key_id, generated_signature=generated_signature, timestamp=timestamp)
 
 
 asyncio.run(main())

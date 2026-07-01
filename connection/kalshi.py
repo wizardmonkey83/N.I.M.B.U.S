@@ -25,8 +25,8 @@ def get_account_balance(timestamp: str):
         TradingState.total_portfolio_usd = float(balance_dollars)
 
 
-async def connect(ws_url: str, api_key_id: str, generated_signature: str):
-    auth_header = package_header(api_key_id=api_key_id, generated_signature=generated_signature)
+async def connect(ws_url: str, api_key_id: str, generated_signature: str, timestamp: str):
+    auth_header = package_header(api_key_id=api_key_id, generated_signature=generated_signature, timestamp=timestamp)
 
     async with websockets.connect(ws_url, additional_headers=auth_header) as websocket:
         print("Connected to Kalshi websocket")

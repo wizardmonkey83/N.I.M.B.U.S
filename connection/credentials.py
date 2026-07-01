@@ -32,12 +32,15 @@ def create_signature(private_key: str, method: str, path: str, timestamp: str):
     )
     return base64.b64encode(signature).decode('utf-8')
 
-def package_header(api_key_id: str, generated_signature: str, timestamp: str):
+def package_header(api_key_id: str, generated_signature: str, timestamp: str, content_type=None):
 
     auth_header = {
         "KALSHI-ACCESS-KEY": api_key_id,
         "KALSHI-ACCESS-SIGNATURE": generated_signature,
         "KALSHI-ACCESS-TIMESTAMP": timestamp
     }
+
+    if content_type:
+        auth_header["Content-Type"] = content_type
 
     return auth_header

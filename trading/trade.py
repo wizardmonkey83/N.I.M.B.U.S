@@ -1,24 +1,10 @@
 import uuid
 import datetime
-import time
 import math
-import requests
-from core.state import TradingState
-from connection.credentials import load_private_key_from_file, create_signature
-
-def package_headers(private_key, method: str, url_path: str):
-    api_key_id = TradingState.api_key_id
-    timestamp = str(int(datetime.datetime.now().timestamp() * 1000))
-    generated_signature = create_signature(private_key=private_key, timestamp=timestamp, method=method, path=url_path)
-
-    headers = {
-        'KALSHI-ACCESS-KEY': api_key_id,
-        'KALSHI-ACCESS-SIGNATURE': generated_signature,
-        'KALSHI-ACCESS-TIMESTAMP': timestamp,
-        'Content-Type': 'application/json'
-    }
-
-    return headers
+import asyncio
+import requests_async
+from core.state import TradingState, ConfigState
+from connection.credentials import load_private_key_from_file, create_signature, package_header, generate_timestamp
 
 def get_kelly_fraction(calculated_prob: float, implied_prob: float):
     """
@@ -55,14 +41,16 @@ def get_kelly_fraction(calculated_prob: float, implied_prob: float):
     return round(kelly_fraction, 2)
 
 
-def place_buy_order(contracts_to_buy: str, curr_contract_price: str, ticker: str, method: str):
-    private_key_path = TradingState.private_key_path
-    buy_order_base_url_path = TradingState.buy_order_base_url_path
-    url_path = TradingState.buy_order_url_path
-    private_key = load_private_key_from_file(file_path=private_key_path)
+async def place_buy_order(contracts_to_buy: str, curr_contract_price: str, ticker: str):
+    buy_order_base_url_path = ConfigState.buy_order_base_url
+    url_path = ConfigState.buy_order_url
+    private_key = ConfigState.private_key
+    api_key_id = ConfigState.api_key_id
 
     for i in range(4):
-        headers = package_headers(private_key=private_key, method="POST", url_path=url_path)
+        timestamp = generate_timestamp()
+        generated_signature = create_signature(private_key=private_key, method="POST", path=url_path, timestamp=timestamp)
+        headers = package_header(api_key_id=api_key_id, generated_signature=generated_signature, timestamp=timestamp, content_type="application/json")
 
         client_order_id = str(uuid.uuid4())
         order_data = {
@@ -76,22 +64,26 @@ def place_buy_order(contracts_to_buy: str, curr_contract_price: str, ticker: str
         }
 
         try:
-            response = requests.post(url=(buy_order_base_url_path + url_path), headers=headers, json=order_data)
+            response = await requests_async.post(url=(buy_order_base_url_path + url_path), headers=headers, json=order_data)
             break
 
         except Exception as e:
-            url_path = f"{buy_order_base_url_path}{url_path}/{client_order_id}"
-            headers = package_headers(private_key=private_key, method="GET", url_path=url_path)
-            response = requests.get(url=url_path, headers=headers)
-            if response.status_code == "200":
+            # TODO check if this url is correct
+            retry_url_path = f"{buy_order_base_url_path}{url_path}/{client_order_id}"
+            generated_signature = create_signature(private_key=private_key, method="GET", path=retry_url_path, timestamp=timestamp)
+            headers = package_header(api_key_id=api_key_id, generated_signature=generated_signature, timestamp=timestamp)
+
+            response = await requests_async.get(url=url_path, headers=headers)
+
+            if response.status_code == 200:
                 break
 
             print(f"Error while placing buy order request: {e}")
-            time.sleep(i * 2)
+            await asyncio.sleep(i * 2)
 
     return response
 
-def buy_contracts(curr_contract_price: str, ticker: str, calculated_prob: float):
+async def buy_contracts(curr_contract_price: str, ticker: str, calculated_prob: float):
     max_bet_frac_of_portfolio = TradingState.max_bet_frac_of_portfolio
     total_mkt_pos_usd = TradingState.total_mkt_pos_usd
     total_portfolio_usd = TradingState.total_portfolio_usd
@@ -100,18 +92,18 @@ def buy_contracts(curr_contract_price: str, ticker: str, calculated_prob: float)
     pos_vs_portfolio = total_mkt_pos_usd / total_portfolio_usd
     if pos_vs_portfolio <= max_bet_frac_of_portfolio:
         # stores in this format --> 
-        bettable_frac_of_porfolio = (max_bet_frac_of_portfolio - pos_vs_portfolio) / 100
+        bettable_frac_of_porfolio = max_bet_frac_of_portfolio - pos_vs_portfolio
         kelly_bettable_frac = get_kelly_fraction(calculated_prob=calculated_prob, implied_prob=float(curr_contract_price))
 
         if kelly_bettable_frac > bettable_frac_of_porfolio:
-            bet_amount_usd = (bettable_frac_of_porfolio / 100) * total_portfolio_usd
+            bet_amount_usd = bettable_frac_of_porfolio * total_portfolio_usd
         else:
-            bet_amount_usd = (kelly_bettable_frac / 100) * total_portfolio_usd
+            bet_amount_usd = kelly_bettable_frac * total_portfolio_usd
         
         contracts_to_buy = math.floor(bet_amount_usd / float(curr_contract_price))
         contracts_to_buy = f"{contracts_to_buy}.00"
 
-        response = place_buy_order(contracts_to_buy=contracts_to_buy, curr_contract_price=curr_contract_price, ticker=ticker, method="POST")
+        response = await place_buy_order(contracts_to_buy=contracts_to_buy, curr_contract_price=curr_contract_price, ticker=ticker, method="POST")
 
         if response.status_code == 201:
             print(f"Order placed successfully!")
@@ -119,5 +111,3 @@ def buy_contracts(curr_contract_price: str, ticker: str, calculated_prob: float)
         else:
             print("Error buying contracts.")
             print(f"Error: {response.status_code} - {response.text}")
-
-    return
