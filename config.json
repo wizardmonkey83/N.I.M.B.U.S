@@ -10,7 +10,8 @@
         "urls":{
             "requests": {
                 "kalshi_portfolio_balance_url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
-                "buy_order_base_url_path": "https://external-api.kalshi.com"
+                "buy_order_base_url_path": "https://external-api.kalshi.com",
+                "kalshi_get_series_url": "https://external-api.kalshi.com/trade-api/v2/series/"
             },
             "endpoints": {
                 "kalshi_portfolio_balance_endpoint": "trade-api/v2/portfolio/balance",
@@ -18,14 +19,25 @@
                 "kalshi_trade_endpoint": "/trade-api/ws/v2"
             },
             "websockets": {
-                "kalshi_ws_url_demo": "wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2",
                 "kalshi_ws_url": "wss://external-api-ws.kalshi.com/trade-api/ws/v2"
+            }
+        },
+        "test_urls": {
+            "requests": {
+                
+            },
+            "endpoints": {
+
+            },
+            "websockets": {
+                "kalshi_ws_url": "wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2"
             }
         }
     },
     "settling_locations": {
         "new_york_city": {
             "name": "central_park",
+            "series_ticker": "KXHIGHNY",
             "coordinates": {
                 "latitude": 40.785091,
                 "longitude": -73.968285,

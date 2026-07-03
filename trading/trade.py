@@ -81,7 +81,7 @@ async def place_buy_order(contracts_to_buy: str, curr_contract_price: str, ticke
             print(f"Error while placing buy order request: {e}")
             await asyncio.sleep(i * 2)
 
-    return response
+    return response if response else None
 
 async def buy_contracts(curr_contract_price: str, ticker: str, calculated_prob: float):
     max_bet_frac_of_portfolio = TradingState.max_bet_frac_of_portfolio

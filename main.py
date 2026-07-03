@@ -3,9 +3,10 @@ import asyncio
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from core.orchestrator import load_config, load_trading_state, load_noaa_url_lat_lon
+from core.orchestrator import load_config, load_states, load_noaa_url_lat_lon
 from extraction.get_grib import get_noaa_forecast
-from connection.kalshi import connect, get_account_balance
+from connection.kalshi import connect
+from extraction.get_trade_info import get_account_balance
 from core.state import TradingState, ConfigState
 from connection.credentials import create_signature, load_private_key_from_file, generate_timestamp
 
@@ -19,7 +20,7 @@ pk_file_path = ConfigState.pk_file_path
 ConfigState.private_key = load_private_key_from_file(file_path=pk_file_path)
 
 print("Loading initial trading state...")
-load_trading_state(config=config)
+load_states(config=config)
 print("Initial trading state loaded!")
 
 print("Retrieving account balance...")
@@ -33,16 +34,17 @@ get_noaa_forecast(noaa_url=noaa_url, latitude=latitude, longitude=longitude)
 
 scheduler = AsyncIOScheduler()
 scheduler.add_job(get_noaa_forecast, "cron", hour="*/6", minute=0, kwargs={"noaa_url": noaa_url, "latitude": latitude, "longitude": longitude})
-# TODO add job that checks currently held contracts against updated odds to see if selling is optimal. should run on the same schedule as get_noaa_forecast
 
 async def main():
     # needs to start within the main event loop for time sync purposes
     scheduler.start()
     timestamp = generate_timestamp()
     if test_mode:
-        ws_url = config.get("settings", {}).get("urls", {}).get("websockets", {}).get("kalshi_ws_url_demo")
+        ws_url = config.get("settings", {}).get("test_urls", {}).get("websockets", {}).get("kalshi_ws_url")
+        print("Test mode toggled ON")
     else:
         ws_url = config.get("settings", {}).get("urls", {}).get("websockets", {}).get("kalshi_ws_url")
+        print("Test mode toggled OFF")
 
     ws_url_endpoint = config.get("settings", {}).get("urls", {}).get("endpoints", {}).get("kalshi_trade_endpoint")
 

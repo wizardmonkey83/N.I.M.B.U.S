@@ -13,6 +13,7 @@ class TradingState:
 
 @dataclass
 class DataState:
+    # TODO will be swapped for dict[list]
     tmax_noaa_values: list[float]
     tmin_noaa_values: list[float]
 
@@ -26,4 +27,6 @@ class ConfigState:
     pk_file_path: str
     portfolio_balance_url_requests: str
     portfolio_balance_url_endpoint: str
-
+    kalshi_get_series_url: str
+    # TODO setup for one location in order to test, will be swapped to dict later on. 
+    kalshi_series_ticker: str
