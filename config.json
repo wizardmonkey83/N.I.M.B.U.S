@@ -11,7 +11,7 @@
             "requests": {
                 "kalshi_portfolio_balance_url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
                 "buy_order_base_url_path": "https://external-api.kalshi.com",
-                "kalshi_get_series_url": "https://external-api.kalshi.com/trade-api/v2/series/"
+                "kalshi_get_markets_url": "https://external-api.kalshi.com/trade-api/v2/markets"
             },
             "endpoints": {
                 "kalshi_portfolio_balance_endpoint": "trade-api/v2/portfolio/balance",

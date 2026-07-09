@@ -18,17 +18,18 @@ def load_config():
         raise Exception(f"Unable to load config as a dict: {e}")
     
 def load_states(config: dict):
-    min_edge_pct = config.get("settings", {}).get("trading", {}).get("min_edge_pct")
-    max_bet_pct_of_portfolio = config.get("settings", {}).get("trading", {}).get("max_bet_pct_of_portfolio")
-    min_pct_of_values_in_temp_range = config.get("settings", {}).get("trading", {}).get("min_pct_of_values_in_temp_range")
-    min_pct_of_values_over_under_temp = config.get("settings", {}).get("trading", {}).get("min_pct_of_values_over_under_temp")
+    min_edge_pct = config["settings"]["trading"]["min_edge_pct"]
+    max_bet_pct_of_portfolio = config["settings"]["trading"]["max_bet_pct_of_portfolio"]
+    min_pct_of_values_in_temp_range = config["settings"]["trading"]["min_pct_of_values_in_temp_range"]
+    min_pct_of_values_over_under_temp = config["settings"]["trading"]["min_pct_of_values_over_under_temp"]
 
-    buy_order_url_path = config.get("settings", {}).get("urls", {}).get("endpoints", {}).get("buy_order_url_path")
-    portfolio_balance_url_requests = config.get("settings", {}).get("urls", {}).get("requests", {}).get("kalshi_portfolio_balance_url")
-    portfolio_balance_url_endpoint = config.get("settings", {}).get("urls", {}).get("endpoints", {}).get("kalshi_portfolio_balance_endpoint")
-    kalshi_get_series_url = config.get("settings", {}).get("urls", {}).get("requests", {}).get("kalshi_get_series_url")
+    buy_order_url_path = config["settings"]["urls"]["endpoints"]["buy_order_url_path"]
+    portfolio_balance_url_requests = config["settings"]["urls"]["requests"]["kalshi_portfolio_balance_url"]
+    portfolio_balance_url_endpoint = config["settings"]["urls"]["endpoints"]["kalshi_portfolio_balance_endpoint"]
+    kalshi_get_markets_url = config["settings"]["urls"]["requests"]["kalshi_get_markets_url"]
+
     # TODO hardcoded for now
-    kalshi_series_ticker = config.get("settling_locations", {}).get("new_york_city", {}).get("series_ticker")
+    kalshi_series_ticker = config["settling_locations"]["new_york_city"]["series_ticker"]
 
     api_key_id = config("API_KEY_ID")
     pk_file_path = config("PK_FILE_PATH")
@@ -46,13 +47,14 @@ def load_states(config: dict):
         pk_file_path=pk_file_path,
         portfolio_balance_url_requests=portfolio_balance_url_requests,
         portfolio_balance_url_endpoint=portfolio_balance_url_endpoint,
-        kalshi_get_series_url=kalshi_get_series_url,
+        kalshi_get_markets_url=kalshi_get_markets_url,
         kalshi_series_ticker=kalshi_series_ticker
     )
 
 def load_noaa_url_lat_lon():
     # TODO all hardcoded for now
-    noaa_url = config.get("settling_locations", {}).get("new_york_city", {}).get("grib_filter_url")
-    latitude = config.get("settling_locations", {}).get("new_york_city", {}).get("coordinates", {}).get("latitude")
-    longitude = config.get("settling_locations", {}).get("new_york_city", {}).get("coordinates", {}).get("longitude")
+    noaa_url = config["settling_locations"]["new_york_city"]["grib_filter_url"]
+    latitude = config["settling_locations"]["new_york_city"]["coordinates"]["latitude"]
+    longitude = config["settling_locations"]["new_york_city"]["coordinates"]["longitude"]
+
     return noaa_url, str(latitude), str(longitude)

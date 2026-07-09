@@ -32,5 +32,5 @@ async def get_daily_tickers():
                 return response.text
             
         except Exception as e:
-            print(f"Error getting daily tickers. Error: {e}")
+            print(f"Error getting daily tickers. Error: {e}. Trying again...")
             asyncio.sleep(i * 2)
