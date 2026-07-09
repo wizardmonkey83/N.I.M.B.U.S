@@ -3,21 +3,37 @@ import asyncio
 import json
 import requests
 
-from core.state import ConfigState, TradingState
+from core.state import ConfigState, TradingState, DataState
 from trading.probability import calculate_edge
 from trading.trade import buy_contracts
 from connection.credentials import package_header, create_signature, generate_timestamp
 
 
 async def connect(ws_url: str, api_key_id: str, generated_signature: str, timestamp: str):
-    auth_header = package_header(api_key_id=api_key_id, generated_signature=generated_signature, timestamp=timestamp)
+    while True:
+        try:
+            auth_header = package_header(api_key_id=api_key_id, generated_signature=generated_signature, timestamp=timestamp)
+            print("Connecting to kalshi websocket...")
+            async with websockets.connect(ws_url, additional_headers=auth_header) as websocket:
+                print("Connected to Kalshi websocket")
+                DataState.kalshi_websocket = websocket
 
-    async with websockets.connect(ws_url, additional_headers=auth_header) as websocket:
-        print("Connected to Kalshi websocket")
-        await subscribe_to_markets(websocket=websocket, )
+                daily_tickers_with_names = DataState.daily_tickers
+                mkt_tickers = [item["ticker"] for item in daily_tickers_with_names]
 
-        async for message in websocket:
-            print(f"Received: {message}")
+                await subscribe_to_markets(websocket=websocket, mkt_tickers=mkt_tickers)
+
+
+                async for message in websocket:
+                    print(f"Received: {message}")
+                    await process_message(message=message)
+            
+        except Exception as e:
+            print("Websocket connection closed!")
+            DataState.kalshi_websocket = None
+            await asyncio.sleep(5)
+
+        # this should cycle back up and restart the connection
 
 async def subscribe_to_markets(websocket, channels: list, mkt_tickers: list):
     subscription_message = {

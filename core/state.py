@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import websockets
 
 @dataclass
 class TradingState:
@@ -16,6 +17,9 @@ class DataState:
     # TODO will be swapped for dict[list]
     tmax_noaa_values: list[float]
     tmin_noaa_values: list[float]
+
+    daily_tickers: list[dict]
+    kalshi_websocket: websockets.ClientConnection
 
 @dataclass
 class ConfigState:

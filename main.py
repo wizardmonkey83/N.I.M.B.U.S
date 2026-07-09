@@ -6,7 +6,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from core.orchestrator import load_config, load_states, load_noaa_url_lat_lon
 from extraction.get_grib import get_noaa_forecast
 from connection.kalshi import connect
-from extraction.get_trade_info import get_account_balance
+from extraction.get_trade_info import get_account_balance, get_daily_tickers
 from core.state import TradingState, ConfigState
 from connection.credentials import create_signature, load_private_key_from_file, generate_timestamp
 
@@ -33,20 +33,25 @@ noaa_url, latitude, longitude = load_noaa_url_lat_lon()
 get_noaa_forecast(noaa_url=noaa_url, latitude=latitude, longitude=longitude)
 
 scheduler = AsyncIOScheduler()
+# getting up-to-date forecasts
 scheduler.add_job(get_noaa_forecast, "cron", hour="*/6", minute=0, kwargs={"noaa_url": noaa_url, "latitude": latitude, "longitude": longitude})
+# refreshing daily market tickers. hour subject to change
+scheduler.add_job(get_daily_tickers, "cron", hour=6)
 
 async def main():
     # needs to start within the main event loop for time sync purposes
     scheduler.start()
     timestamp = generate_timestamp()
+
     if test_mode:
-        ws_url = config.get("settings", {}).get("test_urls", {}).get("websockets", {}).get("kalshi_ws_url")
+        ws_url = config["settings"]["test_urls"]["websockets"]["kalshi_ws_url"]
         print("Test mode toggled ON")
     else:
-        ws_url = config.get("settings", {}).get("urls", {}).get("websockets", {}).get("kalshi_ws_url")
+        ws_url = config["settings"]["urls"]["websockets"]["kalshi_ws_url"]
         print("Test mode toggled OFF")
 
-    ws_url_endpoint = config.get("settings", {}).get("urls", {}).get("endpoints", {}).get("kalshi_trade_endpoint")
+    ws_url_endpoint = config["settings"]["urls"]["endpoints"]["kalshi_trade_endpoint"]
+
 
     generated_signature = create_signature(private_key=ConfigState.private_key, method="GET", path=ws_url_endpoint, timestamp=timestamp)
     await connect(ws_url=ws_url, api_key_id=ConfigState.api_key_id, generated_signature=generated_signature, timestamp=timestamp)
