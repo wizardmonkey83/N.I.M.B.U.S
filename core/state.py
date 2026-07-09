@@ -34,3 +34,4 @@ class ConfigState:
     kalshi_get_markets_url: str
     # TODO setup for one location in order to test, will be swapped to dict later on. 
     kalshi_series_ticker: str
+    kalshi_channels: list[str]

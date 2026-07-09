@@ -32,6 +32,9 @@
             "websockets": {
                 "kalshi_ws_url": "wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2"
             }
+        },
+        "other": {
+            "kalshi_channels": ["orderbook_delta"]
         }
     },
     "settling_locations": {

@@ -1,7 +1,7 @@
 import websockets
 import asyncio
 import json
-import requests
+import uuid
 
 from core.state import ConfigState, TradingState, DataState
 from trading.probability import calculate_edge
@@ -21,7 +21,9 @@ async def connect(ws_url: str, api_key_id: str, generated_signature: str, timest
                 daily_tickers_with_names = DataState.daily_tickers
                 mkt_tickers = [item["ticker"] for item in daily_tickers_with_names]
 
-                await subscribe_to_markets(websocket=websocket, mkt_tickers=mkt_tickers)
+                channels = ConfigState.kalshi_channels
+
+                await subscribe_to_markets(websocket=websocket, channels=channels, mkt_tickers=mkt_tickers)
 
 
                 async for message in websocket:
@@ -35,9 +37,11 @@ async def connect(ws_url: str, api_key_id: str, generated_signature: str, timest
 
         # this should cycle back up and restart the connection
 
-async def subscribe_to_markets(websocket, channels: list, mkt_tickers: list):
+async def subscribe_to_markets(websocket, channels: list[str], mkt_tickers: list[str]):
+    message_id = uuid.uuid4()
+    
     subscription_message = {
-        "id": websocket.message_id,
+        "id": message_id,
         "cmd": "subscribe",
         "params": {
             "channels": channels,
@@ -45,7 +49,6 @@ async def subscribe_to_markets(websocket, channels: list, mkt_tickers: list):
         }
     }
     await websocket.ws.send(json.dumps(subscription_message))
-    websocket.message_id += 1
 
 async def process_message(message):
     data = json.loads(message)

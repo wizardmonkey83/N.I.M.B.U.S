@@ -28,6 +28,8 @@ def load_states(config: dict):
     portfolio_balance_url_endpoint = config["settings"]["urls"]["endpoints"]["kalshi_portfolio_balance_endpoint"]
     kalshi_get_markets_url = config["settings"]["urls"]["requests"]["kalshi_get_markets_url"]
 
+    kalshi_channels = config["settings"]["other"]["kalshi_channels"]
+
     # TODO hardcoded for now
     kalshi_series_ticker = config["settling_locations"]["new_york_city"]["series_ticker"]
 
@@ -48,7 +50,8 @@ def load_states(config: dict):
         portfolio_balance_url_requests=portfolio_balance_url_requests,
         portfolio_balance_url_endpoint=portfolio_balance_url_endpoint,
         kalshi_get_markets_url=kalshi_get_markets_url,
-        kalshi_series_ticker=kalshi_series_ticker
+        kalshi_series_ticker=kalshi_series_ticker,
+        kalshi_channels=kalshi_channels
     )
 
 def load_noaa_url_lat_lon():
