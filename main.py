@@ -50,6 +50,21 @@ async def main():
         ws_url = config["settings"]["urls"]["websockets"]["kalshi_ws_url"]
         print("Test mode toggled OFF")
 
+        while True:
+            decision = input("Do you want test mode toggled OFF? Responding 'Y' will result in a LIVE session! (Y/n): ")
+            
+            if decision == "n":
+                # test url
+                ws_url = config["settings"]["test_urls"]["websockets"]["kalshi_ws_url"]
+                print("Test mode toggled ON")
+                break
+            elif decision == "Y":
+                ws_url = config["settings"]["urls"]["websockets"]["kalshi_ws_url"]
+                print("Test mode toggled OFF")
+                break
+            else:
+                print(f"'{decision}' is an invalid function")
+
     ws_url_endpoint = config["settings"]["urls"]["endpoints"]["kalshi_trade_endpoint"]
 
 
@@ -58,4 +73,3 @@ async def main():
 
 
 asyncio.run(main())
-

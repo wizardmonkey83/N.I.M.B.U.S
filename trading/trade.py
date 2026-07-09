@@ -108,6 +108,7 @@ async def buy_contracts(curr_contract_price: str, ticker: str, calculated_prob: 
         if response.status_code == 201:
             print(f"Order placed successfully!")
             print(f"Order details --> Bought {contracts_to_buy} contracts at a price of {curr_contract_price} per contract.")
+            # TODO save this to the db
         else:
-            print("Error buying contracts.")
+            print("Error buying contracts!")
             print(f"Error: {response.status_code} - {response.text}")
