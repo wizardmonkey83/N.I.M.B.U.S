@@ -59,6 +59,8 @@ async def get_daily_tickers():
                     ticker = mkt["ticker"]
                     daily_tickers[ticker] = {
                         "name": mkt["subtitle"],
+                        # TODO this needs to represent the type of market --> daily high or low?
+                        "type": mkt[""],
                         # TODO find how to parse these from 'name'
                         "max_temp": mkt[""],
                         "min_temp": mkt[""]

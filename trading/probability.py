@@ -22,7 +22,7 @@ def temp_values_against_base_temp(min_kalshi_temp: int, max_kalshi_temp: int, te
 
 # high=False should be configured depending on the market. high=True for highest temp, high=False for lowest temp
 # 
-def calculate_edge(min_kalshi_temp: int, max_kalshi_temp: int, best_ask: int, high=False):
+def calculate_edge(min_kalshi_temp: int, max_kalshi_temp: int, best_ask: float, best_bid: float, high=False):
     if high:
         temp_values = DataState.tmax_noaa_values
     else:

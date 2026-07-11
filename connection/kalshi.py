@@ -87,10 +87,31 @@ async def process_message(message):
     elif data.get("type") != "ticker":
         return
     
-    if not data.get("msg", {}).get("market_ticker") and not data.get("msg", {}).get("yes_ask_dollars") and not data.get("msg", {}).get("yes_bid_dollars"):
+    ticker = data.get("msg", {}).get("market_ticker")
+    best_ask = data.get("msg", {}).get("yes_ask_dollars")
+    best_bid = data.get("msg", {}).get("yes_bid_dollars")
+    
+    if not ticker and not best_ask and not best_bid:
         return
 
-    should_buy, calculated_odds = calculate_edge(data["msg"]["market_ticker"], data["msg"]["yes_bid_dollars"], data["msg"]["yes_ask_dollars"])
+    max_kalshi_temp = DataState.daily_tickers.get(ticker, "").get("max_temp")
+    min_kalshi_temp = DataState.daily_tickers.get(ticker, "").get("min_temp")
+    # stores the type of market --> daily high or low
+    extreme = DataState.daily_tickers.get(ticker, "").get("type")
+
+    should_buy = None
+    if max_kalshi_temp and min_kalshi_temp and extreme:
+        if extreme == "high":
+            high = True
+        elif extreme == "low":
+            high = False
+        else:
+            high = None
+
+        if not high:
+            return
+
+        should_buy, calculated_odds = calculate_edge(min_kalshi_temp=min_kalshi_temp, max_kalshi_temp=max_kalshi_temp, best_ask=best_ask, best_bid=best_bid)
 
     if should_buy:
         asyncio.create_task(buy_contracts(curr_contract_price=data["best_ask"], ticker=data["ticker"], calculated_prob=calculated_odds))
