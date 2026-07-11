@@ -18,11 +18,13 @@ class DataState:
     tmax_noaa_values: list[float]
     tmin_noaa_values: list[float]
 
-    daily_tickers: list[dict]
+    daily_tickers: dict
     kalshi_websocket: websockets.ClientConnection
 
 @dataclass
 class ConfigState:
+    test_mode: bool
+
     api_key_id: str
     private_key: str
 

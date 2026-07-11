@@ -18,8 +18,8 @@ async def connect(ws_url: str, api_key_id: str, generated_signature: str, timest
                 print("Connected to Kalshi websocket")
                 DataState.kalshi_websocket = websocket
 
-                daily_tickers_with_names = DataState.daily_tickers
-                mkt_tickers = [item["ticker"] for item in daily_tickers_with_names]
+                daily_tickers_dict = DataState.daily_tickers
+                mkt_tickers = [key for key in daily_tickers_dict]
 
                 channels = ConfigState.kalshi_channels
 
@@ -51,17 +51,46 @@ async def subscribe_to_markets(websocket, channels: list[str], mkt_tickers: list
     await websocket.ws.send(json.dumps(subscription_message))
 
 async def process_message(message):
+    """
+        Sample market_ticker message:
+
+        {
+            "type": "ticker",
+            "sid": 11,
+            "msg": {
+                "market_ticker": "FED-23DEC-T3.00",
+                "market_id": "9b0f6b43-5b68-4f9f-9f02-9a2d1b8ac1a1",
+                "price_dollars": "0.480",
+                "yes_bid_dollars": "0.450",
+                "yes_ask_dollars": "0.530",
+                "volume_fp": "33896.00",
+                "open_interest_fp": "20422.00",
+                "dollar_volume": 16948,
+                "dollar_open_interest": 10211,
+                "yes_bid_size_fp": "300.00",
+                "yes_ask_size_fp": "150.00",
+                "last_trade_size_fp": "25.00",
+                "ts": 1669149841,
+                "ts_ms": 1669149841000,
+                "time": "2022-11-22T20:44:01Z"
+            }
+        }
+    """
+
     data = json.loads(message)
-    if data.get("type") != "orderbook_delta":
-        return
-    
-    elif data.get("type") == "error":
+        
+    if data.get("type") == "error":
         error_code = data.get("msg", {}).get("code")
         error_msg = data.get("msg", {}).get("msg")
         print(f"Error {error_code}: {error_msg}")
         return
+    elif data.get("type") != "ticker":
+        return
+    
+    if not data.get("msg", {}).get("market_ticker") and not data.get("msg", {}).get("yes_ask_dollars") and not data.get("msg", {}).get("yes_bid_dollars"):
+        return
 
-    should_buy, calculated_odds = calculate_edge(data["ticker"], data["best_bid"], data["best_ask"])
+    should_buy, calculated_odds = calculate_edge(data["msg"]["market_ticker"], data["msg"]["yes_bid_dollars"], data["msg"]["yes_ask_dollars"])
 
     if should_buy:
         asyncio.create_task(buy_contracts(curr_contract_price=data["best_ask"], ticker=data["ticker"], calculated_prob=calculated_odds))

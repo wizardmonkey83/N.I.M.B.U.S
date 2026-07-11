@@ -14,7 +14,7 @@ print("Loading config...")
 config = load_config()
 print("Config loaded!")
 
-test_mode = config.get("settings", {}).get("test_mode")
+test_mode = config["settings"]["test_mode"]
 
 pk_file_path = ConfigState.pk_file_path
 ConfigState.private_key = load_private_key_from_file(file_path=pk_file_path)
@@ -56,17 +56,20 @@ async def main():
             if decision == "n":
                 # test url
                 ws_url = config["settings"]["test_urls"]["websockets"]["kalshi_ws_url"]
+                test_mode = True
                 print("Test mode toggled ON")
                 break
             elif decision == "Y":
                 ws_url = config["settings"]["urls"]["websockets"]["kalshi_ws_url"]
+                test_mode = False
                 print("Test mode toggled OFF")
                 break
             else:
                 print(f"'{decision}' is an invalid function")
 
-    ws_url_endpoint = config["settings"]["urls"]["endpoints"]["kalshi_trade_endpoint"]
+    ConfigState.test_mode = test_mode
 
+    ws_url_endpoint = config["settings"]["urls"]["endpoints"]["kalshi_trade_endpoint"]
 
     generated_signature = create_signature(private_key=ConfigState.private_key, method="GET", path=ws_url_endpoint, timestamp=timestamp)
     await connect(ws_url=ws_url, api_key_id=ConfigState.api_key_id, generated_signature=generated_signature, timestamp=timestamp)

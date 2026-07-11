@@ -22,7 +22,12 @@
                 "kalshi_ws_url": "wss://external-api-ws.kalshi.com/trade-api/ws/v2"
             }
         },
-        "test_urls": {
+        "other": {
+            "kalshi_channels": ["market_tickers"]
+        }
+    },
+    "testing": {
+        "urls": {
             "requests": {
                 
             },
@@ -33,8 +38,9 @@
                 "kalshi_ws_url": "wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2"
             }
         },
-        "other": {
-            "kalshi_channels": ["orderbook_delta"]
+        "state": {
+            "total_portfolio_usd": 500,
+            "total_mkt_pos_usd": 0
         }
     },
     "settling_locations": {

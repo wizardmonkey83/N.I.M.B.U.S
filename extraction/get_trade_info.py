@@ -5,7 +5,11 @@ import requests
 from core.state import ConfigState, TradingState, DataState
 from connection.credentials import package_header, create_signature
 
-def get_account_balance(timestamp: str):
+def get_account_balance(timestamp: str, config=False):
+    if ConfigState.test_mode:
+        TradingState.total_portfolio_usd = config.get("testing", {}).get("state", {}).get("total_portfolio_usd", 500)
+        return
+
     api_key_id = ConfigState.api_key_id
     generated_signature = create_signature(private_key=ConfigState.private_key, method="GET", path=ConfigState.portfolio_balance_url_endpoint, timestamp=timestamp)
     headers = package_header(api_key_id=api_key_id, generated_signature=generated_signature, timestamp=timestamp)
@@ -22,6 +26,19 @@ def get_account_balance(timestamp: str):
         TradingState.total_portfolio_usd = float(balance_dollars)
 
 async def get_daily_tickers():
+    """
+        Sample 200 response (cropped to show only relevant values):
+
+        {
+            "markets": [
+                {
+                "ticker": "<string>",
+                "title": "<string>",
+                "subtitle": "<string>",
+            ],
+        }
+    """
+
     base_url = ConfigState.kalshi_get_markets_url
     series_ticker = ConfigState.kalshi_series_ticker
     request_url = f"{base_url}?series_ticker={series_ticker}"
@@ -37,12 +54,15 @@ async def get_daily_tickers():
                 if not markets:
                     raise Exception("Unable to get 'markets' from response json body.")
                 
-                daily_tickers = []
+                daily_tickers = {}
                 for mkt in markets:
-                    daily_tickers.append({
-                        "ticker": mkt["ticker"],
-                        "name": mkt["subtitle"]
-                    })
+                    ticker = mkt["ticker"]
+                    daily_tickers[ticker] = {
+                        "name": mkt["subtitle"],
+                        # TODO find how to parse these from 'name'
+                        "max_temp": mkt[""],
+                        "min_temp": mkt[""]
+                    }
 
                 DataState.daily_tickers = daily_tickers
                 updated_tickers = True

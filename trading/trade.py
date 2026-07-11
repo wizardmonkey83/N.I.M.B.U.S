@@ -103,12 +103,20 @@ async def buy_contracts(curr_contract_price: str, ticker: str, calculated_prob: 
         contracts_to_buy = math.floor(bet_amount_usd / float(curr_contract_price))
         contracts_to_buy = f"{contracts_to_buy}.00"
 
+        if ConfigState.test_mode:
+            
+
+
         response = await place_buy_order(contracts_to_buy=contracts_to_buy, curr_contract_price=curr_contract_price, ticker=ticker, method="POST")
 
         if response.status_code == 201:
             print(f"Order placed successfully!")
             print(f"Order details --> Bought {contracts_to_buy} contracts at a price of {curr_contract_price} per contract.")
-            # TODO save this to the db
+
+            # this might be better to just pull from kalshi via async request but could take longer
+            TradingState.total_mkt_pos_usd += curr_contract_price * contracts_to_buy
+            
+            # TODO save this to the db --> save_order_to_db()
         else:
             print("Error buying contracts!")
             print(f"Error: {response.status_code} - {response.text}")
