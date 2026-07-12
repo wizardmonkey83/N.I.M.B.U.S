@@ -122,11 +122,13 @@ async def process_message(message):
 
     if buy:
         curr_contract_price = float(data["msg"]["yes_ask_dollars"])
+        side = "bid"
 
-        asyncio.create_task(buy_contracts(curr_contract_price=curr_contract_price, ticker=ticker, odds_of_event_occuring=odds_of_event_occuring))
+        asyncio.create_task(buy_contracts(curr_contract_price=curr_contract_price, ticker=ticker, odds_of_event_occuring=odds_of_event_occuring, side=side))
 
     if sell:
         curr_yes_sell_price = float(data["msg"]["yes_bid_dollars"])
         curr_contract_price = 1 - curr_yes_sell_price
+        side = "ask"
         
         # TODO setup a sell contracts func

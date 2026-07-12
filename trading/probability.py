@@ -70,16 +70,16 @@ def calculate_edge(min_kalshi_temp: int, max_kalshi_temp: int, yes_price: float,
     calculated_odds_of_event_occuring = temp_values_against_base_temp(min_kalshi_temp=min_kalshi_temp, max_kalshi_temp=max_kalshi_temp, temp_values=temp_values)
 
     # 0.82 - 0.53 = 0.29
-    yes_trading_edge = calculated_odds_of_event_occuring - yes_price
+    bid_trading_edge = calculated_odds_of_event_occuring - yes_price
     # 0.18 (chance of event not occuring) - 0.45 = -0.27
-    no_trading_edge = calculated_odds_of_event_occuring - no_price
-    trading_edge = max(yes_trading_edge, no_trading_edge)
+    ask_trading_edge = calculated_odds_of_event_occuring - no_price
+    trading_edge = max(bid_trading_edge, ask_trading_edge)
 
     decision = None
     if trading_edge >= min_edge_pct:
         should_trade = True
 
-        if trading_edge == yes_trading_edge:
+        if trading_edge == bid_trading_edge:
             trade_type = "buy"
         else:
             trade_type = "sell"
