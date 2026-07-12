@@ -99,19 +99,34 @@ async def process_message(message):
     # stores the type of market --> daily high or low
     extreme = DataState.daily_tickers.get(ticker, "").get("type")
 
-    should_buy = None
+    buy, sell = False, False
     if max_kalshi_temp and min_kalshi_temp and extreme:
         if extreme == "high":
             high = True
         elif extreme == "low":
             high = False
         else:
-            high = None
-
-        if not high:
             return
 
-        should_buy, calculated_odds = calculate_edge(min_kalshi_temp=min_kalshi_temp, max_kalshi_temp=max_kalshi_temp, best_ask=best_ask, best_bid=best_bid)
+        should_trade, decision = calculate_edge(min_kalshi_temp=min_kalshi_temp, max_kalshi_temp=max_kalshi_temp, best_ask=best_ask, best_bid=best_bid)
+        if not should_trade:
+            return
+        
+        trade_type = decision["trade_type"]
+        odds_of_event_occuring = decision["odds_of_event_occuring"]
 
-    if should_buy:
-        asyncio.create_task(buy_contracts(curr_contract_price=data["best_ask"], ticker=data["ticker"], calculated_prob=calculated_odds))
+        if trade_type == "buy":
+            buy = True
+        else:
+            sell = True
+
+    if buy:
+        curr_contract_price = data["msg"]["yes_ask_dollars"]
+
+        asyncio.create_task(buy_contracts(curr_contract_price=curr_contract_price, ticker=ticker, odds_of_event_occuring=odds_of_event_occuring))
+
+    if sell:
+        curr_yes_sell_price = data["msg"]["yes_bid_dollars"]
+        curr_contract_price = 1 - curr_yes_sell_price
+        
+        # TODO setup a sell contracts func

@@ -6,7 +6,7 @@ import requests_async
 from core.state import TradingState, ConfigState
 from connection.credentials import load_private_key_from_file, create_signature, package_header, generate_timestamp
 
-def get_kelly_fraction(calculated_prob: float, implied_prob: float):
+def get_kelly_fraction(odds_of_event_occuring: float, implied_prob: float):
     """
         Using this formula --> f = ((b(p) - q) / b) * h
         Where: 
@@ -33,8 +33,8 @@ def get_kelly_fraction(calculated_prob: float, implied_prob: float):
     expected_profit = 1 - contract_price
 
     b = expected_profit / contract_price
-    p = calculated_prob
-    q = 1 - calculated_prob
+    p = odds_of_event_occuring
+    q = 1 - odds_of_event_occuring
     h = TradingState.kelly_fraction_haircut_frac
 
     kelly_fraction = (((b * p) - q) / b) * h
@@ -83,7 +83,7 @@ async def place_buy_order(contracts_to_buy: str, curr_contract_price: str, ticke
 
     return response if response else None
 
-async def buy_contracts(curr_contract_price: str, ticker: str, calculated_prob: float):
+async def buy_contracts(curr_contract_price: str, ticker: str, odds_of_event_occuring: float):
     max_bet_frac_of_portfolio = TradingState.max_bet_frac_of_portfolio
     total_mkt_pos_usd = TradingState.total_mkt_pos_usd
     total_portfolio_usd = TradingState.total_portfolio_usd
@@ -93,7 +93,7 @@ async def buy_contracts(curr_contract_price: str, ticker: str, calculated_prob: 
     if pos_vs_portfolio <= max_bet_frac_of_portfolio:
         # stores in this format --> 
         bettable_frac_of_porfolio = max_bet_frac_of_portfolio - pos_vs_portfolio
-        kelly_bettable_frac = get_kelly_fraction(calculated_prob=calculated_prob, implied_prob=float(curr_contract_price))
+        kelly_bettable_frac = get_kelly_fraction(odds_of_event_occuring=odds_of_event_occuring, implied_prob=float(curr_contract_price))
 
         if kelly_bettable_frac > bettable_frac_of_porfolio:
             bet_amount_usd = bettable_frac_of_porfolio * total_portfolio_usd
