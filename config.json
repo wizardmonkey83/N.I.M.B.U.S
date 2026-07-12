@@ -9,14 +9,14 @@
         },
         "urls":{
             "requests": {
+                "kalshi_base_url": "https://external-api.kalshi.com",
                 "kalshi_portfolio_balance_url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
-                "buy_order_base_url_path": "https://external-api.kalshi.com",
                 "kalshi_get_markets_url": "https://external-api.kalshi.com/trade-api/v2/markets"
             },
             "endpoints": {
                 "kalshi_portfolio_balance_endpoint": "trade-api/v2/portfolio/balance",
-                "buy_order_url_path": "/trade-api/v2/portfolio/events/orders",
-                "kalshi_trade_endpoint": "/trade-api/ws/v2"
+                "place_order_endpoint": "/trade-api/v2/portfolio/events/orders",
+                "get_order_endpoint": "/trade-api/v2/portfolio/orders/"
             },
             "websockets": {
                 "kalshi_ws_url": "wss://external-api-ws.kalshi.com/trade-api/ws/v2"
