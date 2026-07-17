@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from collections import defaultdict
 import websockets
 
 @dataclass
@@ -45,6 +46,9 @@ class ConfigState:
     # check orders
     get_order_endpoint: str
 
+    # check market wide positions
+    get_positions_endpoint: str
+
     # portofolio metadata urls
     portfolio_balance_url_requests: str
     portfolio_balance_url_endpoint: str
@@ -53,3 +57,7 @@ class ConfigState:
     # TODO setup for one location in order to test, will be swapped to dict later on. 
     kalshi_series_ticker: str
     kalshi_channels: list[str]
+
+@dataclass
+class TestState:
+    live_orders: defaultdict

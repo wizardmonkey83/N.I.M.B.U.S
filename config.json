@@ -16,7 +16,8 @@
             "endpoints": {
                 "kalshi_portfolio_balance_endpoint": "trade-api/v2/portfolio/balance",
                 "place_order_endpoint": "/trade-api/v2/portfolio/events/orders",
-                "get_order_endpoint": "/trade-api/v2/portfolio/orders/"
+                "get_order_endpoint": "/trade-api/v2/portfolio/orders/",
+                "get_positions_endpoint": "/trade-api/v2/portfolio/positions"
             },
             "websockets": {
                 "kalshi_ws_url": "wss://external-api-ws.kalshi.com/trade-api/ws/v2"

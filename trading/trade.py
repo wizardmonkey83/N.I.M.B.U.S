@@ -3,7 +3,10 @@ import datetime
 import math
 import asyncio
 import requests_async
-from core.state import TradingState, ConfigState
+from collections import defaultdict
+
+
+from core.state import TradingState, ConfigState, TestState
 from connection.credentials import load_private_key_from_file, create_signature, package_header, generate_timestamp
 
 def get_kelly_fraction(odds_of_event_occuring: float, implied_prob: float):
@@ -185,7 +188,22 @@ async def buy_contracts(curr_contract_price: float, ticker: str, odds_of_event_o
 
         test_mode = ConfigState.test_mode
         if test_mode:
-            
+            live_orders = TestState.live_orders
+
+            string_contracts_to_buy = f"{contracts_to_buy}.00"
+
+            order_data = next((order for order in live_orders if order["ticker"] == ticker), None)
+            if not order_data:
+                order_data = defaultdict(dict)
+                order_data["ticker"] = ticker
+
+            order_data["position_fp"] = string_contracts_to_buy
+            order_data["market_exposure_dollars"] = curr_contract_price
+
+            total_traded_dollars = float(order_data.get("total_traded_dollars", "00.00")) + (contracts_to_buy * curr_contract_price)
+            # im pretty sure this formatting is fine
+            order_data["total_traded_dollars"] = str(total_traded_dollars)
+
         else:
             response = await place_order(num_of_contracts=contracts_to_buy, curr_contract_price=curr_contract_price, ticker=ticker, side=side)
 

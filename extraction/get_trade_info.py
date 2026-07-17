@@ -1,12 +1,16 @@
 import asyncio
 import requests_async
 import requests
+import json
 
-from core.state import ConfigState, TradingState, DataState
-from connection.credentials import package_header, create_signature
+from core.state import ConfigState, TradingState, DataState, TestState
+from connection.credentials import package_header, create_signature, generate_timestamp
 
-def get_account_balance(timestamp: str, config=False):
+def get_account_balance(timestamp: str, config=None):
     if ConfigState.test_mode:
+        if not config:
+            print("No config provided. Quitting...")
+            return
         TradingState.total_portfolio_usd = config.get("testing", {}).get("state", {}).get("total_portfolio_usd", 500)
         return
 
@@ -88,3 +92,50 @@ async def get_daily_tickers():
             print(f"Error while closing active socket: {e}")
     else:
         print("No active WebSocket connection found to reset. Loop will connect with new tickers on its next boot.")
+
+
+
+async def get_curr_trades():
+    """
+        Sample 200 response (only showing "market_positions" for brevity):
+
+        {
+            "market_positions": [
+                {
+                "ticker": "<string>",
+                "total_traded_dollars": "0.5600",
+                "position_fp": "10.00",
+                "market_exposure_dollars": "0.5600",
+                "realized_pnl_dollars": "0.5600",
+                "fees_paid_dollars": "0.5600",
+                "last_updated_ts": "2023-11-07T05:31:56Z"
+                }
+            ]
+        }
+    """
+    if ConfigState.test_mode:
+        curr_trades = TestState.live_orders
+        return curr_trades
+
+
+    api_key_id = ConfigState.api_key_id
+    timestamp = generate_timestamp()
+
+    endpoint_url = ConfigState.get_positions_endpoint
+    generated_signature = create_signature(private_key=ConfigState.private_key, method="GET", path=endpoint_url, timestamp=timestamp)
+    headers = package_header(api_key_id=api_key_id, generated_signature=generated_signature, timestamp=timestamp)
+
+    base_url = ConfigState.kalshi_base_url
+    full_url = base_url + endpoint_url
+
+    for i in range(4):
+        try:
+            response = await requests_async.get(url=full_url, headers=headers)
+
+            response.raise_for_status()
+            data = json.loads(response)
+    
+            return data.get("market_positions")
+
+        except Exception as e:
+            print(f"Error getting current trades. Error {e}")

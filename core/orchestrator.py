@@ -36,6 +36,7 @@ def load_states(config: dict):
     place_order_endpoint = config["settings"]["urls"]["endpoints"]["place_order_endpoint"]
     get_order_endpoint = config["settings"]["urls"]["endpoints"]["get_order_endpoint"]
     portfolio_balance_url_endpoint = config["settings"]["urls"]["endpoints"]["kalshi_portfolio_balance_endpoint"]
+    get_positions_endpoint = config["settings"]["urls"]["endpoints"]["get_positions_endpoint"]
     
     # other
     kalshi_channels = config["settings"]["other"]["kalshi_channels"]
